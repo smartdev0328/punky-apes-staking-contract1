@@ -15,7 +15,7 @@ mod constants {
 }
 
 #[program]
-pub mod xapes_staking {
+pub mod punky_staking {
     use super::*;
 
     pub fn create_vault(_ctx: Context<CreateVaultContext>, bump_vault: u8) -> ProgramResult {
@@ -24,8 +24,7 @@ pub mod xapes_staking {
 
     pub fn create_data_account(ctx: Context<CreateDataContext>, bump_data: u8) -> ProgramResult {
         let data = &mut ctx.accounts.data;
-        data.artpunk = 0;
-        data.achievement = 0;
+        data.nft_first = 0;
         Ok(())
     }
     
@@ -77,9 +76,9 @@ pub mod xapes_staking {
 
         
         if token_type == 0 {
-            data.artpunk += 1;
+            data.nft_first += 1;
         }
-        msg!("data.artpunk: {},", data.artpunk);
+        msg!("data.nft_first: {},", data.nft_first);
 
         Ok(())
     }
@@ -143,10 +142,10 @@ pub mod xapes_staking {
         msg!("total: {}", total_reward);
         token::transfer(cpi_ctx, total_reward.into())?;
 
-        if pool.token_type == 0 {
-            data.artpunk -= 1;
+        if pool.token_type == 0 && data.nft_first > 0 {
+            data.nft_first -= 1;
         }
-        msg!("days: {},", data.artpunk);
+        msg!("days: {},", data.nft_first);
 
         Ok(())
     }
@@ -321,9 +320,8 @@ pub struct RetrieveContext<'info> {
 
 #[account]
 pub struct Data {
-    pub artpunk: u32,
-    pub achievement: u32,
-    // pub token_items: u32,
+    pub nft_first: u32,
+
 }
 
 #[account]
