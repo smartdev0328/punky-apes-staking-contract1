@@ -3,7 +3,7 @@ use anchor_spl::token::{self, TokenAccount, Token, Mint};
 use anchor_lang::solana_program::{clock};
 use std::convert::Into;
 use crate::constants::*;
-declare_id!("Bbj49DaVQmAFFYceo2wtpyhkQkbtGtsioB348xHAZMhx");
+declare_id!("Ej8CaD3gWKSQAqZeGsV9UAiVGeu56wN5SP5vNgeQ3dN3");
 
 mod constants {
 
@@ -93,7 +93,7 @@ pub mod punky_staking {
         let clock = clock::Clock::get().unwrap();
 
         let pool_signer_seeds = &[
-            b"POOL SIGNER".as_ref(),
+            b"NFT STAKING POOL SIGNER".as_ref(),
             ctx.accounts.user.to_account_info().key.as_ref(),
             &[bump_signer],
         ];
@@ -113,7 +113,7 @@ pub mod punky_staking {
         token::transfer(cpi_ctx, 1)?;
 
         let vault_seeds = &[
-            b"ARTE staking vault".as_ref(),
+            b"NFT STAKING VAULT".as_ref(),
             &[bump_vault],
         ];
 
@@ -131,7 +131,7 @@ pub mod punky_staking {
         
         
 
-        let life_time = ( clock.unix_timestamp as u32 - pool.last_time );
+        let life_time = clock.unix_timestamp as u32 - pool.last_time;
       
         if life_time < LIFE_TIME {
             pool.reward = BEFORE_LIFETIME_REWARD;
@@ -158,7 +158,7 @@ pub mod punky_staking {
 
         let clock = clock::Clock::get().unwrap();
         let vault_seeds = &[
-            b"ARTE staking vault".as_ref(),
+            b"NFT STAKING VAULT".as_ref(),
             &[bump_vault],
         ];
 
@@ -174,7 +174,7 @@ pub mod punky_staking {
             vault_signer
         );
 
-        let life_time = ( clock.unix_timestamp as u32 - pool.last_time );
+        let life_time = clock.unix_timestamp as u32 - pool.last_time ;
       
         if life_time < LIFE_TIME {
             pool.reward = BEFORE_LIFETIME_REWARD;
@@ -191,33 +191,12 @@ pub mod punky_staking {
         Ok(())
     }
 
-    pub fn retrieve(ctx: Context<RetrieveContext>, bump_signer: u8) -> ProgramResult {
-        let pool_signer_seeds = &[
-            b"artpunk-achivement pool2 signer".as_ref(),
-            &[bump_signer],
-        ];
-
-        let pool_signer = &[&pool_signer_seeds[..]];
-
-        let cpi_ctx = CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            token::Transfer {
-                from: ctx.accounts.nft_from.to_account_info(),
-                to: ctx.accounts.nft_to.to_account_info(),
-                authority: ctx.accounts.pool_signer.to_account_info()
-            },
-            pool_signer
-        );
-
-        token::transfer(cpi_ctx, 1)?;
-        Ok(())
-    }
 }
 
 #[derive(Accounts)]
 #[instruction(bump_vault: u8)]
 pub struct CreateVaultContext<'info> {
-    #[account(init, seeds = [b"ARTE staking vault".as_ref()], bump = bump_vault, payer = admin, space = 8)]
+    #[account(init, seeds = [b"NFT STAKING VAULT".as_ref()], bump = bump_vault, payer = admin, space = 8)]
     pub vault: AccountInfo<'info>,
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>
@@ -226,7 +205,7 @@ pub struct CreateVaultContext<'info> {
 #[derive(Accounts)]
 #[instruction(bump_data: u8)]
 pub struct CreateDataContext<'info> {
-    #[account(init, seeds = [b"DATA OF ART STAKING".as_ref()], bump = bump_data, payer = admin, space = 8 + 8)]
+    #[account(init, seeds = [b"NFT STAKING DATA".as_ref()], bump = bump_data, payer = admin, space = 8 + 8)]
     pub data: Account<'info, Data>,
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>
@@ -235,7 +214,7 @@ pub struct CreateDataContext<'info> {
 #[derive(Accounts)]
 #[instruction(bump_signer: u8)]
 pub struct CreatePoolSignerContext<'info> {
-    #[account(init, seeds = [b"POOL SIGNER".as_ref(), user.key.as_ref()], bump = bump_signer, payer = user, space = 8)]
+    #[account(init, seeds = [b"NFT STAKING POOL SIGNER".as_ref(), user.key.as_ref()], bump = bump_signer, payer = user, space = 8)]
     pub pool_signer: AccountInfo<'info>,
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>
@@ -244,7 +223,7 @@ pub struct CreatePoolSignerContext<'info> {
 #[derive(Accounts)]
 #[instruction(bump_pool: u8)]
 pub struct CreatePoolContext<'info> {
-    #[account(init, seeds = [b"POOL".as_ref(), user.key.as_ref(), mint.key().as_ref()], bump = bump_pool, payer = user, space = 8 + 32 + 32 + 8 + 4 + 1)]
+    #[account(init, seeds = [b"NFT STAKING POOL".as_ref(), user.key.as_ref(), mint.key().as_ref()], bump = bump_pool, payer = user, space = 8 + 32 + 32 + 8 + 4 + 1)]
     pub pool: Account<'info, Pool>,
     pub user: Signer<'info>,
     pub mint: Account<'info, Mint>,
@@ -305,16 +284,6 @@ pub struct ClaimContext<'info> {
     pub token_from: Box<Account<'info, TokenAccount>>, // vault token account
     #[account(mut)]
     pub token_to: Box<Account<'info, TokenAccount>>, // user token account
-    pub token_program: Program<'info, Token>
-}
-
-#[derive(Accounts)]
-pub struct RetrieveContext<'info> {
-    pub pool_signer: AccountInfo<'info>,
-    #[account(mut)]
-    pub nft_from: Box<Account<'info, TokenAccount>>,
-    #[account(mut)]
-    pub nft_to: Box<Account<'info, TokenAccount>>,
     pub token_program: Program<'info, Token>
 }
 
