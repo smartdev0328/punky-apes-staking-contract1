@@ -7,7 +7,7 @@ declare_id!("FVNtaSsr1P2zJ7v5ypCuynySFzaX9cUn7FyWJ6V3kMMH");
 
 mod constants {
 
-    pub const DAY_TIME: u32 = 86400;
+    pub const DAY_TIME: u32 = 10;
     pub const LIFE_TIME: u32 = 11 * DAY_TIME;
     pub const DECIMAL: u64 = 1000000000;
     pub const DEFAULT_REWARD: u64 = 11 * DECIMAL;
