@@ -3,15 +3,16 @@ use anchor_spl::token::{self, TokenAccount, Token, Mint};
 use anchor_lang::solana_program::{clock};
 use std::convert::Into;
 use crate::constants::*;
-declare_id!("Ej8CaD3gWKSQAqZeGsV9UAiVGeu56wN5SP5vNgeQ3dN3");
+declare_id!("FVNtaSsr1P2zJ7v5ypCuynySFzaX9cUn7FyWJ6V3kMMH");
 
 mod constants {
 
-    pub const DAY_TIME: u32 = 60;
-    pub const LIFE_TIME: u32 = 11 * 60;
-    pub const DEFAULT_REWARD: u64 = 11000000000;
+    pub const DAY_TIME: u32 = 86400;
+    pub const LIFE_TIME: u32 = 11 * DAY_TIME;
+    pub const DECIMAL: u64 = 1000000000;
+    pub const DEFAULT_REWARD: u64 = 11 * DECIMAL;
     pub const BEFORE_LIFETIME_REWARD: u64 = 0;
-    pub const DEFAULT_TOKEN_NUMBER: u64 = 100000000000;
+    pub const DEFAULT_TOKEN_NUMBER: u64 = 100 * DECIMAL;
 }
 
 #[program]
@@ -78,8 +79,6 @@ pub mod punky_staking {
         if token_type == 0 {
             data.nft_first += 1;
         }
-        msg!("data.nft_first: {},", data.nft_first);
-
         Ok(())
     }
 
@@ -137,16 +136,12 @@ pub mod punky_staking {
             pool.reward = BEFORE_LIFETIME_REWARD;
         }
         let days: u32 = life_time / DAY_TIME;
-        msg!("days: {}", days);
         let total_reward =  days as u64 * pool.reward + DEFAULT_TOKEN_NUMBER;
-        msg!("total: {}", total_reward);
         token::transfer(cpi_ctx, total_reward.into())?;
 
         if pool.token_type == 0 && data.nft_first > 0 {
             data.nft_first -= 1;
         }
-        msg!("days: {},", data.nft_first);
-
         Ok(())
     }
 
@@ -181,10 +176,7 @@ pub mod punky_staking {
         }
 
         let days: u32 = life_time / DAY_TIME;
-        msg!("days: {}, reward: {}", days, pool.reward);
         let total_reward =  days as u64 * pool.reward;
-        msg!("total: {}", total_reward);
-
         token::transfer(cpi_ctx, total_reward.into())?;
         pool.last_time = clock.unix_timestamp as u32;
         pool.reward = DEFAULT_REWARD;
@@ -194,37 +186,41 @@ pub mod punky_staking {
 }
 
 #[derive(Accounts)]
-#[instruction(bump_vault: u8)]
+#[instruction(bump: u8)]
 pub struct CreateVaultContext<'info> {
-    #[account(init, seeds = [b"NFT STAKING VAULT".as_ref()], bump = bump_vault, payer = admin, space = 8)]
-    pub vault: AccountInfo<'info>,
+    #[account(init, seeds = [b"NFT STAKING VAULT".as_ref()], bump, payer = admin, space = 8 + 1)]
+    pub vault: Account<'info, Vault>,
+    #[account(mut)]
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>
 }
 
 #[derive(Accounts)]
-#[instruction(bump_data: u8)]
+#[instruction(bump: u8)]
 pub struct CreateDataContext<'info> {
-    #[account(init, seeds = [b"NFT STAKING DATA".as_ref()], bump = bump_data, payer = admin, space = 8 + 8)]
+    #[account(init, seeds = [b"NFT STAKING DATA".as_ref()], bump, payer = admin, space = 8 + 8)]
     pub data: Account<'info, Data>,
+    #[account(mut)]
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>
 }
 
 #[derive(Accounts)]
-#[instruction(bump_signer: u8)]
+#[instruction(bump: u8)]
 pub struct CreatePoolSignerContext<'info> {
-    #[account(init, seeds = [b"NFT STAKING POOL SIGNER".as_ref(), user.key.as_ref()], bump = bump_signer, payer = user, space = 8)]
-    pub pool_signer: AccountInfo<'info>,
+    #[account(init, seeds = [b"NFT STAKING POOL SIGNER".as_ref(), user.key.as_ref()], bump, payer = user, space = 8 + 1)]
+    pub pool_signer: Account<'info, PoolSigner>,
+    #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>
 }
 
 #[derive(Accounts)]
-#[instruction(bump_pool: u8)]
+#[instruction(bump: u8)]
 pub struct CreatePoolContext<'info> {
-    #[account(init, seeds = [b"NFT STAKING POOL".as_ref(), user.key.as_ref(), mint.key().as_ref()], bump = bump_pool, payer = user, space = 8 + 32 + 32 + 8 + 4 + 1)]
+    #[account(init, seeds = [b"NFT STAKING POOL".as_ref(), user.key.as_ref(), mint.key().as_ref()], bump, payer = user, space = 8 + 32 + 32 + 8 + 4 + 1)]
     pub pool: Account<'info, Pool>,
+    #[account(mut)]
     pub user: Signer<'info>,
     pub mint: Account<'info, Mint>,
     pub system_program: Program<'info, System>
@@ -246,8 +242,6 @@ pub struct StakeContext<'info> {
     pub token_from: Box<Account<'info, TokenAccount>>, // user token account
     #[account(mut)]
     pub token_to: Box<Account<'info, TokenAccount>>, // vault token account
-
-    pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>,//for init
 }
@@ -256,8 +250,8 @@ pub struct StakeContext<'info> {
 pub struct UnstakeContext<'info> {
     #[account(mut)]
     pub pool: Account<'info, Pool>,
-    pub pool_signer: AccountInfo<'info>,
-    pub vault: AccountInfo<'info>, // this vault account
+    pub pool_signer: Account<'info, PoolSigner>,
+    pub vault: Account<'info, Vault>, // this vault account
     pub user: Signer<'info>,
     pub mint: Account<'info, Mint>,
     #[account(mut)]
@@ -277,7 +271,7 @@ pub struct UnstakeContext<'info> {
 pub struct ClaimContext<'info> {
     #[account(mut)]
     pub pool: Account<'info, Pool>,
-    pub vault: AccountInfo<'info>, // this vault account
+    pub vault: Account<'info, Vault>, // this vault account
     pub user: Signer<'info>,
     pub mint: Account<'info, Mint>,
     #[account(mut)]
@@ -290,9 +284,17 @@ pub struct ClaimContext<'info> {
 #[account]
 pub struct Data {
     pub nft_first: u32,
-
 }
 
+#[account]
+pub struct Vault {
+    pub bump_vault: u8
+}
+
+#[account]
+pub struct PoolSigner {
+    pub bump_signer: u8
+}
 #[account]
 pub struct Pool {
     pub user: Pubkey,
