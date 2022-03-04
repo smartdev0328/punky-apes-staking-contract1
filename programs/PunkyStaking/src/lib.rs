@@ -3,7 +3,7 @@ use anchor_spl::token::{self, TokenAccount, Token, Mint};
 use anchor_lang::solana_program::{clock};
 use std::convert::Into;
 use crate::constants::*;
-declare_id!("FVNtaSsr1P2zJ7v5ypCuynySFzaX9cUn7FyWJ6V3kMMH");
+declare_id!("5rKH8dMmSX7yLxbo44VJyF51JuV4qPmAM6x5w6RgGYaX");
 
 mod constants {
 

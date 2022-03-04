@@ -1,12 +1,12 @@
 [programs.devnet]
-punky_staking = "FVNtaSsr1P2zJ7v5ypCuynySFzaX9cUn7FyWJ6V3kMMH"
+punky_staking = "5rKH8dMmSX7yLxbo44VJyF51JuV4qPmAM6x5w6RgGYaX"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
 cluster = "devnet"
-wallet = "/opt/Soldev/keypair/devnet-ApyraDev.json"
+wallet = "/home/ubuntu/.config/solana/id.json"
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"
