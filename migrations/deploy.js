@@ -7,7 +7,7 @@ const { AccountLayout, TOKEN_PROGRAM_ID, Token } = require('@solana/spl-token');
 const IDL = require('../target/idl/punky_staking.json');
 const { SystemProgram, Keypair, PublicKey } = anchor.web3;
 const token_mint = 'GnBw4qZs3maF2d5ziQmGzquQFnGV33NUcEujTQ3CbzP3';
-const PROGRAM_ID = '5rKH8dMmSX7yLxbo44VJyF51JuV4qPmAM6x5w6RgGYaX';
+const PROGRAM_ID = '3n7nc4FUKJRxhovqwxV9XfYahRcjbxwnaFp1ZSXWqAZ1';
 
 module.exports = async function (provider) {
   // Configure client to use the provider.

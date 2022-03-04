@@ -1,5 +1,5 @@
 [programs.devnet]
-punky_staking = "5rKH8dMmSX7yLxbo44VJyF51JuV4qPmAM6x5w6RgGYaX"
+punky_staking = "3n7nc4FUKJRxhovqwxV9XfYahRcjbxwnaFp1ZSXWqAZ1"
 
 [registry]
 url = "https://anchor.projectserum.com"

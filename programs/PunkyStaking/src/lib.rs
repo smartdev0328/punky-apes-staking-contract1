@@ -3,14 +3,14 @@ use anchor_spl::token::{self, TokenAccount, Token, Mint};
 use anchor_lang::solana_program::{clock};
 use std::convert::Into;
 use crate::constants::*;
-declare_id!("5rKH8dMmSX7yLxbo44VJyF51JuV4qPmAM6x5w6RgGYaX");
+declare_id!("3n7nc4FUKJRxhovqwxV9XfYahRcjbxwnaFp1ZSXWqAZ1");
 
 mod constants {
 
-    pub const DAY_TIME: u32 = 10;
-    pub const LIFE_TIME: u32 = 11 * DAY_TIME;
+    pub const DAY_TIME: u32 = 60;
+    pub const LIFE_TIME: u32 = 8 * DAY_TIME;
     pub const DECIMAL: u64 = 1000000000;
-    pub const DEFAULT_REWARD: u64 = 11 * DECIMAL;
+    pub const DEFAULT_REWARD: u64 = 8 * DECIMAL;
     pub const BEFORE_LIFETIME_REWARD: u64 = 0;
     pub const DEFAULT_TOKEN_NUMBER: u64 = 100 * DECIMAL;
 }
